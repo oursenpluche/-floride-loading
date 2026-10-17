@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Floride Roleplay - Chargement</title>
+<link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One|Roboto+Slab:400,700" rel="stylesheet">
+<style>
+  /* ====== Écrit volontairement en CSS "ancien" pour le navigateur intégré de GMod ====== */
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; }
+  body {
+    background:#2b1a0e;
+    background:-webkit-linear-gradient(top, #3a1f0d 0%, #8a3a12 35%, #d9661c 62%, #f2a43a 74%, #2b1a0e 74.2%, #3b220f 100%);
+    background:linear-gradient(to bottom, #3a1f0d 0%, #8a3a12 35%, #d9661c 62%, #f2a43a 74%, #2b1a0e 74.2%, #3b220f 100%);
+    font-family:'Roboto Slab', Georgia, serif;
+    color:#f3e6c9;
+  }
+
+  /* Soleil derrière le logo */
+  #sun {
+    position:absolute; left:50%; top:74%;
+    width:520px; height:520px; margin-left:-260px; margin-top:-260px;
+    border-radius:50%;
+    background:#ffc23d;
+    box-shadow:0 0 120px 60px rgba(255,170,50,.45);
+    opacity:.9;
+    -webkit-animation:pulse 6s ease-in-out infinite; animation:pulse 6s ease-in-out infinite;
+  }
+  @-webkit-keyframes pulse { 0%,100%{ -webkit-transform:scale(1);} 50%{ -webkit-transform:scale(1.04);} }
+  @keyframes pulse { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.04);} }
+
+  /* Mer : bande sous l'horizon pour cacher le bas du soleil */
+  #sea {
+    position:absolute; left:0; right:0; top:74%; bottom:0;
+    background:#5a2a10;
+    background:-webkit-linear-gradient(top, #a3461a 0%, #6b2f12 30%, #2b1a0e 100%);
+    background:linear-gradient(to bottom, #a3461a 0%, #6b2f12 30%, #2b1a0e 100%);
+  }
+  .wave {
+    position:absolute; height:3px; border-radius:3px;
+    background:rgba(255,200,110,.55);
+    -webkit-animation:shimmer 4s ease-in-out infinite; animation:shimmer 4s ease-in-out infinite;
+  }
+  @-webkit-keyframes shimmer { 0%,100%{opacity:.2;} 50%{opacity:.8;} }
+  @keyframes shimmer { 0%,100%{opacity:.2;} 50%{opacity:.8;} }
+
+  /* Nuages */
+  .cloud {
+    position:absolute; height:14px; border-radius:14px;
+    background:rgba(255,180,90,.35);
+    -webkit-animation:drift 60s linear infinite; animation:drift 60s linear infinite;
+  }
+  @-webkit-keyframes drift { from{ -webkit-transform:translateX(-200px);} to{ -webkit-transform:translateX(2200px);} }
+  @keyframes drift { from{ transform:translateX(-200px);} to{ transform:translateX(2200px);} }
+
+  /* Bloc central */
+  #center {
+    position:absolute; left:50%; top:50%;
+    width:560px; margin-left:-280px;
+    -webkit-transform:translateY(-58%); transform:translateY(-58%);
+    text-align:center;
+  }
+  #logo { width:360px; height:auto; display:block; margin:0 auto;
+          -webkit-filter:drop-shadow(0 8px 20px rgba(0,0,0,.5)); filter:drop-shadow(0 8px 20px rgba(0,0,0,.5)); }
+
+  /* Logo texte de secours si logo.png est absent */
+  #logo-fallback { display:none; }
+  #logo-fallback .t1 {
+    display:inline-block; background:#2b1a0e; color:#f3e6c9;
+    font-family:'Alfa Slab One', Georgia, serif; font-size:64px; letter-spacing:3px;
+    padding:4px 26px; border:4px solid #f3e6c9;
+  }
+  #logo-fallback .t2 {
+    display:inline-block; background:#2b1a0e; color:#f3e6c9; margin-top:-4px;
+    font-family:'Alfa Slab One', Georgia, serif; font-size:30px; letter-spacing:4px;
+    padding:2px 20px; border:4px solid #f3e6c9; border-top:none;
+  }
+
+  #panel {
+    margin:28px auto 0; width:520px; padding:18px 22px 16px;
+    background:rgba(43,26,14,.82);
+    border:3px solid #f3e6c9;
+    box-shadow:0 8px 30px rgba(0,0,0,.4);
+    text-align:left;
+  }
+  #info { font-size:14px; color:#f2b25c; margin-bottom:10px; }
+  #info b { color:#f3e6c9; }
+
+  #bar { height:16px; background:#4a2c16; border:2px solid #f3e6c9; overflow:hidden; }
+  #fill {
+    height:100%; width:0%;
+    background:#f29a2e;
+    background:-webkit-linear-gradient(left, #d9661c, #ffc23d);
+    background:linear-gradient(to right, #d9661c, #ffc23d);
+    -webkit-transition:width .4s ease; transition:width .4s ease;
+  }
+  #row { margin-top:8px; font-size:13px; color:#e8d6b0; overflow:hidden; }
+  #status { float:left; width:440px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #percent { float:right; font-weight:bold; color:#ffc23d; }
+
+  #tip {
+    margin-top:14px; padding-top:12px; border-top:1px dashed rgba(243,230,201,.35);
+    font-size:14px; color:#f3e6c9; min-height:38px;
+    -webkit-transition:opacity .5s; transition:opacity .5s;
+  }
+  #tip span { color:#ffc23d; font-weight:bold; }
+
+  #footer {
+    position:absolute; bottom:18px; left:0; right:0; text-align:center;
+    font-size:13px; color:rgba(243,230,201,.7); letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+  <div id="sun"></div>
+  <div class="cloud" style="top:12%; width:180px; left:5%;"></div>
+  <div class="cloud" style="top:20%; width:120px; left:40%; -webkit-animation-duration:80s; animation-duration:80s;"></div>
+  <div class="cloud" style="top:28%; width:220px; left:70%; -webkit-animation-duration:95s; animation-duration:95s;"></div>
+
+  <div id="sea">
+    <div class="wave" style="top:8%;  left:38%; width:24%;"></div>
+    <div class="wave" style="top:18%; left:30%; width:40%; -webkit-animation-delay:1s; animation-delay:1s;"></div>
+    <div class="wave" style="top:30%; left:42%; width:16%; -webkit-animation-delay:2s; animation-delay:2s;"></div>
+    <div class="wave" style="top:44%; left:20%; width:18%; -webkit-animation-delay:.5s; animation-delay:.5s;"></div>
+    <div class="wave" style="top:52%; left:64%; width:14%; -webkit-animation-delay:1.5s; animation-delay:1.5s;"></div>
+  </div>
+
+  <div id="center">
+    <img id="logo" src="logo.png" alt="Floride Roleplay" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+    <div id="logo-fallback">
+      <div class="t1">FLORIDE</div><br>
+      <div class="t2">ROLEPLAY</div>
+    </div>
+
+    <div id="panel">
+      <div id="info">Map : <b id="map">...</b> &nbsp;|&nbsp; Mode : <b id="gm">...</b> &nbsp;|&nbsp; Slots : <b id="slots">...</b></div>
+      <div id="bar"><div id="fill"></div></div>
+      <div id="row"><div id="status">Connexion au serveur...</div><div id="percent">0%</div></div>
+      <div id="tip"></div>
+    </div>
+  </div>
+
+  <div id="footer">Bienvenue sur Floride Roleplay — bon jeu !</div>
+
+  <!-- Musique (optionnel) : mets un fichier music.mp3 à côté et retire les commentaires
+  <audio id="music" src="music.mp3" autoplay loop></audio>
+  -->
+
+<script>
+  /* ================== À PERSONNALISER ================== */
+  var TIPS = [
+    "<span>Règle :</span> Le Freekill est interdit, toute action violente doit avoir une raison RP.",
+    "<span>Règle :</span> Respecte la NLR (New Life Rule) après ta mort.",
+    "<span>Astuce :</span> Rejoins notre Discord pour suivre les annonces du serveur.",
+    "<span>Règle :</span> Pas de Metagaming : n'utilise pas d'infos obtenues hors RP.",
+    "<span>Astuce :</span> Les forces de l'ordre recrutent, renseigne-toi en jeu !",
+    "<span>Règle :</span> Respect obligatoire envers les joueurs et le staff."
+  ];
+  var TIP_DELAY = 6000; // ms entre deux conseils
+  /* ===================================================== */
+
+  var total = 0, inGame = false, demoCall = false;
+  function real() { if (!demoCall) inGame = true; }
+
+  function $(id) { return document.getElementById(id); }
+  function setProgress(p) {
+    if (p < 0) p = 0; if (p > 100) p = 100;
+    $("fill").style.width = p + "%";
+    $("percent").innerHTML = Math.round(p) + "%";
+  }
+
+  /* ----- Fonctions appelées automatiquement par Garry's Mod ----- */
+  function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
+    real();
+    $("map").innerHTML = mapname;
+    $("gm").innerHTML = gamemode;
+    $("slots").innerHTML = maxplayers;
+    var m = $("music");
+    if (m && volume !== undefined) m.volume = volume * 0.5;
+  }
+  function SetFilesTotal(t) { real(); total = t; }
+  function SetFilesNeeded(needed) {
+    real();
+    if (total > 0) setProgress((total - needed) / total * 100);
+  }
+  function DownloadingFile(file) {
+    real();
+    $("status").innerHTML = "Téléchargement : " + file;
+  }
+  function SetStatusChanged(status) {
+    real();
+    var fr = {
+      "Retrieving server info": "Récupération des infos du serveur...",
+      "Sending client info...": "Envoi des infos client...",
+      "Client info sent!": "Infos client envoyées !",
+      "Starting Lua...": "Démarrage du Lua...",
+      "Workshop Complete": "Workshop terminé",
+      "Mounting Addons": "Montage des addons..."
+    };
+    $("status").innerHTML = fr[status] || status;
+    if (status.indexOf("Starting Lua") === 0) setProgress(100);
+  }
+
+  /* ----- Conseils qui défilent ----- */
+  var tipIndex = Math.floor(Math.random() * TIPS.length);
+  function nextTip() {
+    var el = $("tip");
+    el.style.opacity = 0;
+    setTimeout(function () {
+      el.innerHTML = TIPS[tipIndex];
+      tipIndex = (tipIndex + 1) % TIPS.length;
+      el.style.opacity = 1;
+    }, 500);
+  }
+  nextTip();
+  setInterval(nextTip, TIP_DELAY);
+
+  /* ----- Mode démo : si tu ouvres la page dans un navigateur normal ----- */
+  setTimeout(function () {
+    if (inGame) return;
+    demoCall = true;
+    GameDetails("Floride RP", "", "rp_florida", 64, "", "darkrp", 0.5);
+    var t = 120, n = 120;
+    SetFilesTotal(t);
+    demoCall = false;
+    var demo = setInterval(function () {
+      if (inGame) { clearInterval(demo); return; }
+      n -= 3; if (n < 0) { n = t; }
+      demoCall = true;
+      SetFilesNeeded(n);
+      DownloadingFile("materials/floride/texture_" + (t - n) + ".vtf");
+      demoCall = false;
+    }, 300);
+  }, 1500);
+</script>
+</body>
+</html>
