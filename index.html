@@ -104,6 +104,11 @@
   }
   #tip span { color:#ffc23d; font-weight:bold; }
 
+  #mute {
+    position:absolute; right:18px; bottom:14px; padding:6px 12px; cursor:pointer;
+    font-size:12px; color:#f3e6c9; background:rgba(43,26,14,.7); border:2px solid #f3e6c9;
+  }
+  #mute:hover { background:rgba(217,102,28,.8); }
   #footer {
     position:absolute; bottom:18px; left:0; right:0; text-align:center;
     font-size:13px; color:rgba(243,230,201,.7); letter-spacing:1px;
@@ -142,9 +147,9 @@
 
   <div id="footer">Bienvenue sur Floride Roleplay — bon jeu !</div>
 
-  <!-- Musique (optionnel) : mets un fichier music.mp3 à côté et retire les commentaires
+  <!-- Musique d'ambiance (remplace music.mp3 par ta propre musique si tu veux) -->
   <audio id="music" src="music.mp3" autoplay loop></audio>
-  -->
+  <div id="mute">&#9835; Musique : ON</div>
 
 <script>
   /* ================== À PERSONNALISER ================== */
@@ -175,8 +180,7 @@
     $("map").innerHTML = mapname;
     $("gm").innerHTML = gamemode;
     $("slots").innerHTML = maxplayers;
-    var m = $("music");
-    if (m && volume !== undefined) m.volume = volume * 0.5;
+    if (volume !== undefined && !demoCall) { musicMax = MUSIC_VOLUME * volume; if (music && music.volume > musicMax) music.volume = musicMax; }
   }
   function SetFilesTotal(t) { real(); total = t; }
   function SetFilesNeeded(needed) {
@@ -199,6 +203,27 @@
     };
     $("status").innerHTML = fr[status] || status;
     if (status.indexOf("Starting Lua") === 0) setProgress(100);
+  }
+
+  /* ----- Musique : fondu d'entrée + bouton couper ----- */
+  var MUSIC_VOLUME = 0.5;      // volume max (0 à 1)
+  var musicMax = MUSIC_VOLUME, muted = false;
+  var music = $("music");
+  if (music) {
+    music.volume = 0;
+    try { music.play(); } catch (e) {}
+    var fade = setInterval(function () {
+      if (muted) return;
+      var v = music.volume + 0.02;
+      if (v >= musicMax) { v = musicMax; clearInterval(fade); }
+      music.volume = v;
+    }, 100);
+    $("mute").onclick = function () {
+      muted = !muted;
+      music.muted = muted;
+      if (!muted) music.volume = musicMax;
+      this.innerHTML = "&#9835; Musique : " + (muted ? "OFF" : "ON");
+    };
   }
 
   /* ----- Conseils qui défilent ----- */
